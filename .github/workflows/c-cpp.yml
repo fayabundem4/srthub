@@ -14,5 +14,25 @@ jobs:
     - uses: actions/checkout@v4
     - name: Install make, g++, srt-devel
       run: sudo dnf install make g++ srt-devel -y
+    - name: Find libsrt.so
+      id: find_libsrt
+      run: |
+        set -e
+        LIBSRT_PATH=$(find /usr/lib64 /usr/lib /usr/local/lib -name 'libsrt.so' -print -quit)
+        if [ -z "$LIBSRT_PATH" ]; then
+          echo "libsrt.so not found" >&2
+          exit 1
+        fi
+        echo "libsrt_path=$LIBSRT_PATH" >> $GITHUB_OUTPUT
     - name: make
       run: make
+    - name: Upload Srthub artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Srthub
+        path: srthub
+    - name: Upload Libsrt artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Libsrt
+        path: ${{ steps.find_libsrt.outputs.libsrt_path }}
