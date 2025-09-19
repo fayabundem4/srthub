@@ -14,6 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install libsrt
-      run: sudo apt-get update && sudo apt-get install -y libsrt-dev
+      run: sudo apt-get update && sudo apt-get install -y srt
     - name: make
       run: make
