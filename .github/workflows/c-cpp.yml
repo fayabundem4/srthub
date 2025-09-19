@@ -12,9 +12,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Install libsrt
-      run: sudo dnf install srt-devel -y
-    - name: Install make
-      run: sudo dnf install make -y
+    - name: Install make, g++, srt-devel
+      run: sudo dnf install make g++ srt-devel -y
     - name: make
       run: make
