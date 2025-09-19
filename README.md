@@ -38,7 +38,13 @@ You can connect multiple clients to the client port. Each will receive the relay
 
 ## Building
 
-Make sure you have the SRT library installed. Then run:
+Make sure you have the SRT library installed:
+
+Ubuntu/Debian: `sudo apt install libsrt-dev`
+
+Fedora: `sudo dnf install srt-devel`
+
+Then run:
 
 ```
 make
