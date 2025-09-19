@@ -1,10 +1,10 @@
 # Makefile for building srthub
 
-CXX = g++
-CXXFLAGS = -Os -Wall -Wextra -std=c++11
-LDFLAGS = -lsrt
+CXX = cc
+CXXFLAGS = -Os -Wall -Wextra -pedantic -std=gnu99
+LDFLAGS = -lsrt 
 TARGET = srthub
-SRC = srthub.cpp
+SRC = srthub.c
 
 all: $(TARGET)
 

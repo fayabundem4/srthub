@@ -2,25 +2,31 @@
 #include <signal.h>
 #include <srt/srt.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <vector>
 
-#define MAX_CLIENTS 512
+#define MAX_CLIENTS 11000
 #define TS_PACKET_SIZE 1316
-// #define TS_PACKET_SIZE 188
 #define CLIENT_QUEUE_LEN 1024
 
 volatile int running = 1;
 
-void handle_sigint(int sig) { running = 0; }
+void handle_sigint(int unused) { running = 0; }
 
 typedef struct {
   SRTSOCKET sock;
   int head, tail, count;
   char packets[CLIENT_QUEUE_LEN][TS_PACKET_SIZE];
+  int active;
 } Client;
+
+void remove_client(Client clients[], int idx, int free_list[], int *free_list_count) {
+  if (clients[idx].sock != SRT_INVALID_SOCK) {
+    srt_close(clients[idx].sock);
+  }
+  clients[idx].sock = SRT_INVALID_SOCK;
+  clients[idx].active = 0;
+  free_list[(*free_list_count)++] = idx;
+}
+
 
 void enqueue_packet(Client *c, const char *data) {
   if (c->count == CLIENT_QUEUE_LEN) {
@@ -41,22 +47,14 @@ int dequeue_packet(Client *c, char *out) {
   return TS_PACKET_SIZE;
 }
 
-void remove_client(std::vector<Client> &clients, int idx) {
-  if (clients[idx].sock != SRT_INVALID_SOCK) {
-    srt_close(clients[idx].sock);
-  }
-  clients.erase(clients.begin() + idx);
-}
-
 int main(int argc, char **argv) {
-  if (argc != 4) {
-    printf("Usage: %s <source_port> <client_port> <latency_ms>\n", argv[0]);
+  if (argc != 3) {
+    printf("Usage: %s <source_port> <client_port>\n", argv[0]);
     return 1;
   }
 
   int src_port = atoi(argv[1]);
   int client_port = atoi(argv[2]);
-  int latency = atoi(argv[3]);
 
   signal(SIGINT, handle_sigint);
   if (srt_startup() != 0) {
@@ -101,7 +99,6 @@ int main(int argc, char **argv) {
   }
   printf("Source connected\n");
 
-  srt_setsockflag(src_sock, SRTO_LATENCY, &latency, sizeof(latency));
   int bufsize = 16 * 1024 * 1024;
   srt_setsockflag(src_sock, SRTO_RCVBUF, &bufsize, sizeof(bufsize));
   srt_setsockflag(src_sock, SRTO_SNDBUF, &bufsize, sizeof(bufsize));
@@ -147,12 +144,20 @@ int main(int argc, char **argv) {
   srt_epoll_add_usock(eid, src_sock, &events);
   srt_epoll_add_usock(eid, client_listener, &events);
 
-  std::vector<Client> clients;
+  Client* clients = (Client*)malloc(sizeof(Client)*MAX_CLIENTS);
+  int free_list[MAX_CLIENTS];
+  int free_list_count = MAX_CLIENTS;
+  for (int i = 0; i < MAX_CLIENTS; ++i) {
+    clients[i].sock = SRT_INVALID_SOCK;
+    clients[i].active = 0;
+    free_list[i] = i;
+  }
+
 
   // allocate space for up to MAX_CLIENTS + 2 (src + listener) sockets
-  std::vector<SRTSOCKET> read_socks(MAX_CLIENTS + 2);
-  std::vector<SRTSOCKET> write_socks(MAX_CLIENTS);
-  std::vector<SYSSOCKET> lrfds(MAX_CLIENTS + 2), lwfds(MAX_CLIENTS);
+  SRTSOCKET read_socks[MAX_CLIENTS + 2];
+  SRTSOCKET write_socks[MAX_CLIENTS];
+  SYSSOCKET lrfds[MAX_CLIENTS + 2], lwfds[MAX_CLIENTS];
   int rnum, wnum, lrnum, lwnum;
 
   char ts_packet[TS_PACKET_SIZE];
@@ -161,14 +166,14 @@ int main(int argc, char **argv) {
   int tmp_len = 0;
 
   while (running) {
-    rnum = read_socks.size();
-    wnum = write_socks.size();
-    lrnum = lrfds.size();
-    lwnum = lwfds.size();
+    rnum = MAX_CLIENTS + 2;
+    wnum = MAX_CLIENTS;
+    lrnum = MAX_CLIENTS + 2;
+    lwnum = MAX_CLIENTS;
 
     int r =
-        srt_epoll_wait(eid, read_socks.data(), &rnum, write_socks.data(), &wnum,
-                       100, lrfds.data(), &lrnum, lwfds.data(), &lwnum);
+      srt_epoll_wait(eid, read_socks, &rnum, write_socks, &wnum,
+               100, lrfds, &lrnum, lwfds, &lwnum);
 
     if (r < 0) {
       if (srt_getlasterror(NULL) != SRT_ETIMEOUT) {
@@ -182,30 +187,28 @@ int main(int argc, char **argv) {
 
       // Handle new client connections
       if (current_sock == client_listener) {
-        if (clients.size() < MAX_CLIENTS) {
+        if (free_list_count > 0) {
           SRTSOCKET new_client = srt_accept(client_listener, NULL, NULL);
           if (new_client != SRT_INVALID_SOCK) {
-            Client c;
-            c.sock = new_client;
-            c.head = 0;
-            c.tail = 0;
-            c.count = 0;
-            srt_setsockflag(c.sock, SRTO_LATENCY, &latency, sizeof(latency));
-            srt_setsockflag(c.sock, SRTO_SNDBUF, &bufsize, sizeof(bufsize));
-            srt_setsockflag(c.sock, SRTO_RCVBUF, &bufsize, sizeof(bufsize));
-            clients.push_back(c);
+            int idx = free_list[--free_list_count];
+            clients[idx].sock = new_client;
+            clients[idx].head = 0;
+            clients[idx].tail = 0;
+            clients[idx].count = 0;
+            clients[idx].active = 1;
+            srt_setsockflag(clients[idx].sock, SRTO_SNDBUF, &bufsize, sizeof(bufsize));
+            srt_setsockflag(clients[idx].sock, SRTO_RCVBUF, &bufsize, sizeof(bufsize));
 
             // Add the new client socket to the epoll instance
             int client_events = SRT_EPOLL_OUT | SRT_EPOLL_ERR;
             srt_epoll_add_usock(eid, new_client, &client_events);
 
-            printf("New client connected: %zu\n", clients.size());
+            printf("New client connected: %d\n", idx);
           }
         }
       }
       // Handle incoming data from the source
       else if (current_sock == src_sock) {
-        char recv_buf[1500];
         int bytes_received =
             srt_recv(src_sock, tmp_buf + tmp_len, sizeof(tmp_buf) - tmp_len);
         if (bytes_received < 0) {
@@ -221,8 +224,10 @@ int main(int argc, char **argv) {
             memcpy(ts_packet, tmp_buf, TS_PACKET_SIZE);
 
             // Enqueue to all clients
-            for (auto &client : clients) {
-              enqueue_packet(&client, ts_packet);
+            for (int j = 0; j < MAX_CLIENTS; ++j) {
+              if (clients[j].active) {
+                enqueue_packet(&clients[j], ts_packet);
+              }
             }
 
             // Shift remaining data to the beginning of the buffer
@@ -234,11 +239,11 @@ int main(int argc, char **argv) {
       }
       // Handle client disconnections or errors
       else {
-        for (size_t j = 0; j < clients.size(); ++j) {
-          if (clients[j].sock == current_sock) {
-            printf("Client disconnected. Removing.\n");
+        for (int j = 0; j < MAX_CLIENTS; ++j) {
+          if (clients[j].active && clients[j].sock == current_sock) {
+            printf("Client %d disconnected. Removing.\n", j);
             srt_epoll_remove_usock(eid, current_sock);
-            remove_client(clients, j);
+            remove_client(clients, j, free_list, &free_list_count);
             break;
           }
         }
@@ -246,32 +251,35 @@ int main(int argc, char **argv) {
     }
 
     // 3) Send packets to clients
-    for (size_t i = 0; i < clients.size(); ++i) {
-      Client &c = clients[i];
+    for (int i = 0; i < MAX_CLIENTS; ++i) {
+      if (!clients[i].active) continue;
       char send_buf[TS_PACKET_SIZE];
       int len;
-      while ((len = dequeue_packet(&c, send_buf)) > 0) {
-        int sent = srt_send(c.sock, send_buf, len);
+      while ((len = dequeue_packet(&clients[i], send_buf)) > 0) {
+        int sent = srt_send(clients[i].sock, send_buf, len);
         if (sent < 0) {
           int error = srt_getlasterror(NULL);
           if (error != SRT_EASYNCSND) {
             printf("Client disconnected or slow. Removing.\n");
-            srt_epoll_remove_usock(eid, c.sock);
-            remove_client(clients, i);
-            i--;
+            srt_epoll_remove_usock(eid, clients[i].sock);
+            remove_client(clients, i, free_list, &free_list_count);
             break;
           }
         }
       }
     }
 
-    usleep(100);
+    usleep(1000);
   }
 
   // Cleanup
-  for (auto &c : clients) {
-    srt_close(c.sock);
+  for (int i = 0; i < MAX_CLIENTS; ++i) {
+    if (clients[i].active) {
+      srt_close(clients[i].sock);
+    }
   }
+
+  free(clients);
   srt_close(src_sock);
   srt_close(src_listener);
   srt_close(client_listener);
