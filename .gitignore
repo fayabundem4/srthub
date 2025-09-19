@@ -1,0 +1,23 @@
+# Ignore build output and binaries
+out/
+srthub
+*.o
+*.obj
+*.exe
+*.log
+*.tmp
+
+# Editor and OS files
+*.swp
+*.swo
+*~
+.DS_Store
+.vscode/
+.idea/
+
+# Ignore core dumps
+core
+*.core
+
+# Ignore Makefile backup
+Makefile.bak
