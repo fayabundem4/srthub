@@ -9,11 +9,11 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: fedora-latest
 
     steps:
     - uses: actions/checkout@v4
     - name: Install libsrt
-      run: sudo apt-get update && sudo apt-get install -y srt
+      run: sudo dnf install srt-devel -y
     - name: make
       run: make
