@@ -3,14 +3,13 @@ name: C/C++ Build
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   build:
-
-    runs-on: fedora-latest
-
+    name: Build on Fedora Container (running on Ubuntu)
+    runs-on: ubuntu-latest
+    container: fedora:42
+    
     steps:
     - uses: actions/checkout@v4
     - name: Install libsrt
