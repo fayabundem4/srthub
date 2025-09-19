@@ -9,10 +9,12 @@ jobs:
     name: Build on Fedora Container (running on Ubuntu)
     runs-on: ubuntu-latest
     container: fedora:42
-    
+
     steps:
     - uses: actions/checkout@v4
     - name: Install libsrt
       run: sudo dnf install srt-devel -y
+    - name: Install make
+      run: sudo dnf install make -y
     - name: make
       run: make
