@@ -10,18 +10,17 @@ srthub is a simple open source SRT hub for relaying MPEG-TS streams to multiple 
 ## Usage
 
 ```
-./srthub <source_port> <client_port> <latency_ms>
+./srthub <source_port> <client_port>
 ```
 
 - `source_port`: Port to listen for the incoming SRT stream (from ffmpeg or other source)
 - `client_port`: Port to accept client connections (e.g., mpv, ffplay)
-- `latency_ms`: SRT latency in milliseconds
 
 ### Example
 
 1. Start the hub:
    ```bash
-   ./srthub 10000 9000 1000
+   ./srthub 10000 9000
    ```
 
 2. Send a stream to the hub using ffmpeg:
